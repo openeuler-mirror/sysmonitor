@@ -1,0 +1,15 @@
+/var/log/sysmonitor.log
+{
+    create
+    compress
+    rotate 30
+    missingok
+    notifempty
+    size +2048k
+    createolddir 700 root root
+    olddir  /var/log/logdump/sysmonitor
+    sharedscripts
+    postrotate
+        /bin/kill -HUP `cat /var/run/rsyslogd.pid 2> /dev/null` 2> /dev/null || true
+    endscript
+}

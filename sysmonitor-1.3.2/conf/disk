@@ -1,0 +1,5 @@
+# DISK: disk mount point; ALARM: alarm percent; RESUME: alarm resume percent
+# DISK="/var" ALARM="80" RESUME="70"
+# DISK="/root" ALARM="90" RESUME="75"
+DISK="/"
+DISK="/var/log"

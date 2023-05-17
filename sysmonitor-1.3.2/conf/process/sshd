@@ -1,0 +1,5 @@
+USER=root
+NAME=sshd
+RECOVER_COMMAND=systemctl restart sshd
+MONITOR_COMMAND=/usr/libexec/sysmonitor/check_sshd.sh
+STOP_COMMAND=systemctl stop sshd

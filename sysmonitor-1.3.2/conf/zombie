@@ -1,0 +1,8 @@
+# Ceiling zombie process counts of alarm
+ALARM="500"
+
+# Floor zombie process counts of resume
+RESUME="400"
+
+# Periodic (second)
+PERIOD="600"

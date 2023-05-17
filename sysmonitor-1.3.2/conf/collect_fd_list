@@ -1,0 +1,9 @@
+#占句柄数最多的进程个数
+ALL_FD_NUM_MONITOR_TOP_N="15"
+
+#占socket句柄数最多的进程个数
+SOCKET_FD_NUM_MONITOR_TOP_N="15"
+
+#收集的进程执行路径及参数，与/proc/pid/cmdline中一致，不支持模糊匹配
+CMD_LINE="/usr/bin/sysmonitor"
+CMD_LINE="/usr/sbin/rsyslogd -n"

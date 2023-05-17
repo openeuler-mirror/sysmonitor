@@ -1,0 +1,6 @@
+#MONITOR_COMMAND return value = 0, The status of crond is normal
+#MONITOR_COMMAND return value = 1, The status of crond is abnormal
+#MONITOR_COMMAND return value = 2, The number of crond process is abnormal
+USER=root
+NAME=crond
+MONITOR_COMMAND=/usr/libexec/sysmonitor/check_cron.sh

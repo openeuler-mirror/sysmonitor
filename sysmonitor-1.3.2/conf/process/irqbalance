@@ -1,0 +1,5 @@
+USER=root
+NAME=irqbalance
+RECOVER_COMMAND=systemctl restart irqbalance
+MONITOR_COMMAND=systemctl status irqbalance
+STOP_COMMAND=systemctl stop irqbalance
