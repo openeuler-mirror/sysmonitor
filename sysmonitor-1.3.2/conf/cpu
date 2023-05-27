@@ -1,0 +1,20 @@
+# cpu usage alarm percent
+ALARM="90"
+
+# cpu usage alarm resume percent
+RESUME="80"
+
+# monitor period (second)
+MONITOR_PERIOD="60"
+
+# stat period (second)
+STAT_PERIOD="300"
+
+# cpu range in a domain, format can be "X,Y" or "X-Y" or mixed. Also can
+# be followed by ALARM/RESUME to set usage alarm/resume percent in this domain.
+# DOMAIN="0,1"
+# DOMAIN="2-3" ALARM="50" RESUME="40"
+DOMAIN=""
+
+# command executed when cpu usage exceeds alarm percent
+REPORT_COMMAND=""

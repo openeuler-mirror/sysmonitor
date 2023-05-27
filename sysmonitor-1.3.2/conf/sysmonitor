@@ -1,0 +1,81 @@
+# process monitor
+PROCESS_MONITOR="on"
+
+# process monitor period(second)
+PROCESS_MONITOR_PERIOD="3"
+
+# process recover failed, recall recover period(minute)
+PROCESS_RECALL_PERIOD="1"
+
+# process recover timeout (second)
+PROCESS_RESTART_TIMEOUT="90"
+
+#alarm restrict num
+PROCESS_ALARM_SUPRESS_NUM="5"
+
+# file system monitor
+FILESYSTEM_MONITOR="on"
+
+# signal monitor
+SIGNAL_MONITOR="on"
+
+# disk monitor
+DISK_MONITOR="on"
+
+# disk monitor period(second)
+DISK_MONITOR_PERIOD="60"
+
+# disk inode monitor
+INODE_MONITOR="on"
+
+# disk inode monitor period(second)
+INODE_MONITOR_PERIOD="60"
+
+# netcard monitor
+NETCARD_MONITOR="on"
+
+# file monitor
+FILE_MONITOR="on"
+
+# cpu monitor
+CPU_MONITOR="on"
+
+# memory usage monitor
+MEM_MONITOR="on"
+
+# process(thread) count monitor
+PSCNT_MONITOR="on"
+
+# systemd fd usage monitor
+FDCNT_MONITOR="on"
+
+# process fd usage monitor
+PROCESS_FD_NUM_MONITOR="on"
+
+# custom daemon monitor
+CUSTOM_DAEMON_MONITOR="on"
+
+# custom periodic monitor
+CUSTOM_PERIODIC_MONITOR="on"
+
+# local disk io delay monitor
+IO_DELAY_MONITOR="off"
+
+# zombie process count monitor
+ZOMBIE_MONITOR="off"
+
+# Sysmonitor wait all service finish when 'PROCESS_MONITOR_DELAY' set 'on' or 'PROCESS_MONITOR_DELAY' item is null.
+# Not wait all service finish when 'PROCESS_MONITOR_DELAY' set 'off'.
+PROCESS_MONITOR_DELAY="on"
+
+# network fib info print rate limit, default is 5 in on second, range: 0-100
+NET_RATE_LIMIT_BURST="5"
+
+# fd monitor log path
+FD_MONITOR_LOG_PATH="/var/log/fd_monitor.log"
+
+# check thread status monitor
+CHECK_THREAD_MONITOR="on"
+
+# check thread failure num, range: 2-10
+CHECK_THREAD_FAILURE_NUM="3"

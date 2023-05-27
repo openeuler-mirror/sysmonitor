@@ -1,0 +1,4 @@
+MONITOR_SWITCH="on"
+TYPE="periodic"
+EXECSTART="/usr/libexec/sysmonitor/logind_clear.sh"
+PERIOD="28800"

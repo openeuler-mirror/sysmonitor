@@ -1,0 +1,5 @@
+USER=root
+NAME=rsyslogd
+RECOVER_COMMAND=systemctl restart rsyslog
+MONITOR_COMMAND=/usr/libexec/sysmonitor/check_syslog.sh
+STOP_COMMAND=systemctl stop rsyslog

@@ -1,0 +1,6 @@
+# system fd usage alarm percent
+SYS_FD_ALARM="80"
+# system fd usage alarm resume percent
+SYS_FD_RESUME="70"
+# monitor period (second)
+SYS_FD_PERIOD="600"

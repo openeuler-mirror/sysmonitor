@@ -1,0 +1,18 @@
+# number of processes(include threads) when alarm occur
+ALARM="1600"
+
+# number of processes(include threads) when alarm resume
+RESUME="1500"
+
+# monitor period(second)
+PERIOD="60"
+
+# process count usage alarm percent
+ALARM_RATIO="90"
+
+# process count usage resume percent
+RESUME_RATIO="80"
+
+# print top process info with largest num of threads when threads alarm
+# (range: 0-1024, default: 10, monitor for thread off:0)
+SHOW_TOP_PROC_NUM="10"

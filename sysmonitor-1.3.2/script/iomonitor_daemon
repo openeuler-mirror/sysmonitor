@@ -1,0 +1,120 @@
+#!/bin/bash
+
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
+# Description: io monitor
+# Author:
+# Create: 2018-11-2
+
+#remove old tmp file
+rm -rf /tmp/io_sample.log
+rm -rf /tmp/iomonitor_*.log
+IO_THRESHOLD=50
+SAVE_TOPN=3
+CMD_NAME="iomonitor_daemon"
+
+trap 'echo "`date` [$0] trap exceptional signal! exit." > /dev/kmsg; rm -rf /tmp/iomonitor_*.log >/dev/null 2>&1; exit 0;' SIGHUP SIGINT SIGTERM SIGQUIT SIGKILL
+
+PATH=$PATH:/usr/sbin:/usr/bin:/bin:/sbin
+
+function iotop_logger()
+{
+	logger  -it "sysmonitor" "[LOC $(date +"%Y-%m-%d:%H:%M:%S")]sysmonitor[$(pidof sysmonitor)]:" -p info "$1"
+}
+
+function get_inflight_log()
+{
+	disk_name_all=`ls /sys/block`
+	for disk_name in $disk_name_all
+	do
+		iotop_logger "$disk_name inflight info:`cat /sys/block/$disk_name/inflight`"
+	done
+}
+
+function get_iotop_log()
+{
+	local first_line=0
+	local head_line=2
+	local print_i=0
+	local tmp_file=""
+
+	iotop_logger "$CMD_NAME start"
+
+	head_line=2
+	save_umask=$(umask)
+	umask 077
+	tmp_file=`mktemp /tmp/iomonitor_XXXXXXXXXX.log`
+	if [ $? -ne 0 ]
+	then
+		iotop_logger "create tmp file failed."
+		umask "${save_umask}"
+		exit 1
+	fi
+	umask "${save_umask}"
+	iotop  -n 3 -b -t -d 1 -o   > $tmp_file
+	last_line=`grep  -n  "Total DISK READ"  $tmp_file | awk 'END {print}' | awk -F: '{print $1}'`
+	if [ -z $last_line ]
+	then
+		iotop_logger "iotop run fail."
+		rm  -rf "$tmp_file"  >/dev/null 2>&1
+		return
+	fi
+	#some version iotop display "Actual DISK READ"
+	if [ -n "`grep 'Actual DISK READ' $tmp_file`" ]
+	then
+		head_line=$((head_line+1))
+	fi
+
+	#skip head
+	first_line=$((last_line+head_line))
+	io_size=`cat $tmp_file | tail -n +$first_line | head -n 1 | awk '{print  $11}'`
+	if [ -z "$io_size" ]
+	then
+		#no io info
+		rm  -rf "$tmp_file"  >/dev/null 2>&1
+		return
+	fi
+	io_size=${io_size%%.*}
+	if [ $io_size -lt $IO_THRESHOLD ]
+	then
+		rm  -rf "$tmp_file"  >/dev/null 2>&1
+		return
+	fi
+	#the header info
+	print_i=0
+	while [ $print_i -lt $head_line ]
+	do
+		iotop_logger "`sed -n ${last_line}p $tmp_file`"
+		last_line=$((last_line+1))
+		print_i=$((print_i+1))
+	done
+
+	#log the io info
+	iotop_logger "`sed -n ${first_line}p $tmp_file`"
+	get_inflight_log
+	first_line=$((first_line+1))
+	print_i=1
+	while [ $print_i -lt $SAVE_TOPN ]
+	do
+		io_size=`cat $tmp_file | tail -n +$first_line | head -n 1 | awk '{print  $11}'`
+		if [ -z "$io_size" ]
+		then
+			#no io info
+			break
+		fi
+		io_size=${io_size%%.*}
+		if [ $io_size -lt $IO_THRESHOLD ]
+		then
+			break
+		fi
+
+		iotop_logger "`sed -n ${first_line}p $tmp_file`"
+		get_inflight_log
+		first_line=$((first_line+1))
+		print_i=$((print_i+1))
+	done
+
+	rm  -rf "$tmp_file"  >/dev/null 2>&1
+}
+
+get_iotop_log
+exit 0

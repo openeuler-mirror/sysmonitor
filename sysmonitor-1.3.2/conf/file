@@ -1,0 +1,2 @@
+# for now, 0x200 is del, 0x100 is add, and 0x300 is both del and add
+/usr/sbin/logrotate 0x200

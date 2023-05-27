@@ -1,0 +1,24 @@
+[Unit]
+Before=network-pre.target
+Wants=network-pre.target
+After=ksecurec.service
+Description=System Monitor Service
+
+[Service]
+Type=forking
+PIDFile=/var/run/sysmonitor.pid
+ExecStartPre=-/bin/bash /usr/libexec/sysmonitor/ko.sh install
+ExecStartPre=-/bin/bash /usr/libexec/sysmonitor/rm_duplicat_conf.sh
+ExecStartPre=-/bin/bash /usr/libexec/sysmonitor/process_clock_data.sh init
+ExecStart=/usr/bin/sysmonitor --daemon
+ExecStop=/usr/bin/sleep 0.5
+ExecStopPost=-/bin/bash /usr/libexec/sysmonitor/ko.sh rm
+ExecStopPost=-/bin/bash /usr/libexec/sysmonitor/process_clock_data.sh rm
+ExecStopPost=-/bin/bash /usr/libexec/sysmonitor/clean_remain_process.sh
+ExecReload=/bin/kill -USR2 $MAINPID
+KillMode=process
+StandardOutput=null
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

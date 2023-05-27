@@ -1,0 +1,5 @@
+USER=root
+NAME=libvirtd
+RECOVER_COMMAND=systemctl restart libvirtd
+MONITOR_COMMAND=systemctl status libvirtd
+STOP_COMMAND=systemctl stop libvirtd

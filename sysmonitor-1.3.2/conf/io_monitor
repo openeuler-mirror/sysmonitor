@@ -1,0 +1,4 @@
+MONITOR_SWITCH="on"
+TYPE="periodic"
+EXECSTART="/usr/sbin/iomonitor_daemon"
+PERIOD="1800"
