@@ -38,6 +38,12 @@ typedef struct __signo_msg {
 	char recv_comm[TASK_COMM_LEN];
 } qemu_signo_msg;
 
+typedef struct send_sig_info_data {
+	int sig;
+	struct kernel_siginfo *info;
+	struct task_struct *p;
+} send_sig_info_data_t;
+
 void signo_catch_init(void);
 void signo_catch_exit(void);
 

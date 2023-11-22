@@ -12,6 +12,7 @@
 #include <linux/netlink.h>
 #include <linux/notifier.h>
 #include <linux/proc_fs.h>
+#include <linux/kprobes.h>
 
 #include "sysmonitor_main.h"
 
@@ -27,6 +28,10 @@ static ulong g_qemu_buf_seq; /* index for reader */
 #define SIG_BUFMASK (SIG_BUFSIZE - 1)
 static qemu_signo_msg g_qemu_buf[SIG_BUFSIZE];
 struct proc_dir_entry *g_proc_qemu;
+
+static struct kprobe kp = {
+	.symbol_name = "do_send_sig_info"
+};
 
 static ssize_t qemu_read(struct file *file, char __user *buf, size_t count, loff_t *ppos)
 {
@@ -91,7 +96,6 @@ static const struct proc_ops g_proc_qemu_operations = {
 };
 #endif
 
-#ifdef CONFIG_EULEROS_SYSMONITOR_SIGNAL
 /* Here introduce euler_get_mm_exe_file and euler_get_task_exe_file
  * to solve the build and insmod error.
  */
@@ -132,16 +136,16 @@ static struct file *euler_get_task_exe_file(struct task_struct *task)
 static int save_exe_info(char *exe, int exe_size, struct task_struct *task)
 {
 	struct file *exe_file = NULL;
-	int ret;
+	void *ret;
 
 	exe_file = euler_get_task_exe_file(task);
 	if (exe_file != NULL) {
 		ret = memcpy(exe,
 			exe_file->f_path.dentry->d_name.name,
 			exe_file->f_path.dentry->d_name.len);
-		if (ret != 0) {
+		if (ret == NULL) {
 			fput(exe_file);
-			return ret;
+			return -1;
 		}
 		fput(exe_file);
 	}
@@ -200,8 +204,6 @@ static int save_msg_info(ce_signo_msg *msg, const send_sig_info_data_t *notifier
 
 static int save_qemu_msg_info(qemu_signo_msg *qemu_msg, const send_sig_info_data_t *notifier_call_data)
 {
-	int ret;
-
 	(void)memset(qemu_msg, 0, sizeof(qemu_signo_msg));
 	qemu_msg->send_pid = current->pid;
 	(void)memcpy(qemu_msg->send_comm, current->comm, TASK_COMM_LEN);
@@ -213,18 +215,17 @@ static int save_qemu_msg_info(qemu_signo_msg *qemu_msg, const send_sig_info_data
 	return 0;
 }
 
-static int do_store_sig_info(struct notifier_block *self, unsigned long val, void *data)
+static int do_store_sig_info(send_sig_info_data_t *data)
 {
-	send_sig_info_data_t *notifier_call_data = (send_sig_info_data_t *)data;
 	ce_signo_msg msg;
 	ulong index;
 	qemu_signo_msg *qemu_msg = NULL;
 	unsigned long sigcatchmask = get_sigcatchmask();
 	int ret;
 
-	if ((notifier_call_data->sig <= SIGNAL_COUNT) &&
-		(sigcatchmask & (1ul << (unsigned int)(notifier_call_data->sig - 1)))) {
-		ret = save_msg_info(&msg, notifier_call_data);
+	if ((data->sig <= SIGNAL_COUNT) &&
+		(sigcatchmask & (1ul << (unsigned int)(data->sig - 1)))) {
+		ret = save_msg_info(&msg, data);
 		if (ret != 0) {
 			goto out;
 		}
@@ -233,12 +234,12 @@ static int do_store_sig_info(struct notifier_block *self, unsigned long val, voi
 	}
 
 #ifdef QEMU_SIG
-	if ((notifier_call_data->sig == SIGKILL) &&
-		!strcmp(notifier_call_data->p->comm, "qemu-kvm")) {
+	if ((data->sig == SIGKILL) &&
+		!strcmp(data->p->comm, "qemu-kvm")) {
 		index = g_qemu_buf_seq & SIG_BUFMASK;
 		qemu_msg = g_qemu_buf + index;
 
-		ret = save_qemu_msg_info(qemu_msg, notifier_call_data);
+		ret = save_qemu_msg_info(qemu_msg, data);
 		if (ret) {
 			goto out;
 		}
@@ -251,14 +252,29 @@ static int do_store_sig_info(struct notifier_block *self, unsigned long val, voi
 	}
 #endif
 out:
-	return NOTIFY_DONE;
+	return 0;
 }
 
-static struct notifier_block g_signo_catch_nb = {
-	.notifier_call = do_store_sig_info,
-	.priority = NOTIFY_CALL_PRIORITY,
-};
+static int pre_handler(struct kprobe *p, struct pt_regs *regs) 
+{
+#ifdef CONFIG_ARM64
+	send_sig_info_data_t data;
+	data.sig = regs->regs[0];
+	data.info = (struct kernel_siginfo *)((unsigned long *)regs->regs[1]);
+	data.p = (struct task_struct *)((unsigned long *)regs->regs[2]);
+	do_store_sig_info(&data);
 #endif
+
+#ifdef CONFIG_X86_64
+	send_sig_info_data_t data;
+	data.sig = regs->di;
+	data.info = (struct kernel_siginfo *)((unsigned long *)regs->si);
+	data.p = (struct task_struct *)((unsigned long *)regs->dx);
+	do_store_sig_info(&data);
+#endif
+	return 0;
+}
+
 
 void signo_catch_init(void)
 {
@@ -268,22 +284,20 @@ void signo_catch_init(void)
 		printk(KERN_ERR "signo_catch: create /proc/sig_catch failed.\n");
 	}
 #endif
-#ifdef CONFIG_EULEROS_SYSMONITOR_SIGNAL
-	(void)register_signo_catch_notifier(&g_signo_catch_nb);
-#endif
-	printk(KERN_INFO "signo_catch: Planted send_sig_info_notifier_list register\n");
+	kp.pre_handler = pre_handler;
+	register_kprobe(&kp);
+
+	printk(KERN_INFO "signo_catch: register signal kprobe\n");
 }
 
 void signo_catch_exit(void)
 {
-#ifdef CONFIG_EULEROS_SYSMONITOR_SIGNAL
-	(void)unregister_signo_catch_notifier(&g_signo_catch_nb);
-#endif
+	unregister_kprobe(&kp);
 #ifdef QEMU_SIG
 	if (g_proc_qemu != NULL) {
 		proc_remove(g_proc_qemu);
 	}
 #endif
-	printk(KERN_INFO "signo_catch: send_sig_info_notifier_list unregistered\n");
+	printk(KERN_INFO "signo_catch: unregister signal kprobe\n");
 }
 
