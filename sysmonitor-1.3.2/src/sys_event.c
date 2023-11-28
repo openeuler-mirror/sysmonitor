@@ -681,6 +681,7 @@ static int handle_signo_msg(const sysmonitor_event_msg *event_msg)
             log_printf(LOG_ERR, "sig_monitor_start: snprintf_s alarm_msg failed.");
             return -1;
         }
+        log_printf(LOG_INFO, "%s", alarm_msg);
     }
 
     return 0;
