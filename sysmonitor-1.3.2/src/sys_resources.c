@@ -64,6 +64,8 @@
 #define MAX_DOMAIN_CPU_COUNT 256
 #ifdef __x86_64__
 #define DOMAIN_CPU_LEN 1024  /* x86 supports max 8192 CPUs */
+#elif defined(__riscv)
+#define DOMAIN_CPU_LEN 64    /* riscv supports max 512 CPUs */
 #else
 #define DOMAIN_CPU_LEN 128   /* arm64 supports max 1024 CPUs */
 #endif

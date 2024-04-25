@@ -272,6 +272,14 @@ static int pre_handler(struct kprobe *p, struct pt_regs *regs)
 	data.p = (struct task_struct *)((unsigned long *)regs->dx);
 	do_store_sig_info(&data);
 #endif
+
+#if defined(CONFIG_RISCV) && defined(CONFIG_64BIT)
+	send_sig_info_data_t data;
+	data.sig = regs->a0;
+	data.info = (struct kernel_siginfo *)((unsigned long *)regs->a1);
+	data.p = (struct task_struct *)((unsigned long *)regs->a2);
+	do_store_sig_info(&data);
+#endif
 	return 0;
 }
 
