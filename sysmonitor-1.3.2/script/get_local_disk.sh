@@ -9,6 +9,8 @@ fc_disk_file=""
 local_disk_file=""
 if uname -a | grep -q aarch64; then
 	fc_local_disk=`ls -l /sys/block/ | grep -E 'pci|HISI0162' 2> /dev/null`
+elif uname -a | grep -q riscv64; then
+	fc_local_disk=`ls -l /sys/block/ | grep -E 'pci|virtio' 2> /dev/null`
 else
 	fc_local_disk=`ls -l /sys/block/ | grep pci 2> /dev/null`
 fi
