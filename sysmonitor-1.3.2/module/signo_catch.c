@@ -257,7 +257,7 @@ out:
 
 static int pre_handler(struct kprobe *p, struct pt_regs *regs) 
 {
-#ifdef CONFIG_ARM64
+#if (defined(CONFIG_ARM64) || defined(CONFIG_LOONGARCH))
 	send_sig_info_data_t data;
 	data.sig = regs->regs[0];
 	data.info = (struct kernel_siginfo *)((unsigned long *)regs->regs[1]);
