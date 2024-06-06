@@ -60,9 +60,7 @@ def start_dhclient_task(cmd):
 
 def check_cmd_user(cmd_user):
     """check cmd user is root"""
-    std_cmd_user = "root"
-    if cmd_user:
-        if cmd_user == std_cmd_user:
+    if cmd_user == "root":
             return True
     return False
 
@@ -83,8 +81,8 @@ def check_cmd_name(cmd_line):
 
 def reset_dhclient():
     """find and kill dhclient process and start new dhclient"""
-    ret, ps_result = subprocess.getstatusoutput(("ps -eLwwo user,pid,args|"
-        "grep -w /sbin/dhclient|grep -v grep"))
+    ret, ps_result = subprocess.getstatusoutput("ps -eLwwo user,pid,args|"
+        "grep -w /sbin/dhclient|grep -v grep")
     if ret != 0:
         return
 
