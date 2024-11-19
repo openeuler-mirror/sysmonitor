@@ -39,7 +39,7 @@ install(FILES ../conf/io_monitor DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/sysmoni
 install(FILES ../service/sysmonitor.service DESTINATION ${SYSTEMD_SERVICEDIR})
 
 add_custom_target(uninstall
-	COMMAND rm -rf /etc/sysmonitor /usr/libexec/sysmonitor /etc/rsyslog.d/sysmonitor.conf /etc/sysmonitor.d/
+	COMMAND rm -rf /etc/sysmonitor ${CMAKE_INSTALL_SYSCONFDIR}/sysconfig/sysmonitor /usr/libexec/sysmonitor /etc/rsyslog.d/sysmonitor.conf /etc/sysmonitor.d/
 	COMMAND rm -rf /usr/lib/systemd/system/sysmonitor.service
 	COMMAND rm -rf /usr/sbin/iomonitor_daemon /usr/bin/sysmonitor
 	COMMENT "Uninstall sysmonitor"
