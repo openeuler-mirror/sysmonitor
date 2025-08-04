@@ -1,0 +1,6 @@
+label: sysmonitor用户指南
+isManual: true
+description: 使用 sysmonitor 服务监控 OS 系统运行过程中的异常
+sections:
+  - label: sysmonitor用户指南
+    href: ./sysmonitor_user_guide.md
