@@ -2,5 +2,5 @@ label: sysmonitor User Guide
 isManual: true
 description: sysmonitor tracks exceptions in the OS during runtime.
 sections:
-  - label: SysCare Introduction
+  - label: sysmonitor User Guide
     href: ./sysmonitor_user_guide.md
